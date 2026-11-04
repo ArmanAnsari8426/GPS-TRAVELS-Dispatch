@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GPS Travels Dispatch</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap brand">
+      <div class="logo"><img src="img/logo.png" alt="GPS Travels logo"></div>
+      <div>
+        <h1>GPS TRAVELS</h1>
+        <p>Transport Dispatch &middot; Trip sheet to WhatsApp</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="box">
+      <div class="uploads">
+        <label class="drop" id="dropTrips">
+          <input type="file" id="fileTrips" accept=".xls,.xlsx" hidden>
+          <b>1. Vendor trip sheet</b>Choose or drop an .xls / .xlsx file
+        </label>
+        <label class="drop" id="dropContacts">
+          <input type="file" id="fileContacts" accept=".xls,.xlsx,.csv" hidden>
+          <b>2. Your driver list (optional)</b>Driver name or vehicle no. + mobile
+        </label>
+      </div>
+
+      <details>
+        <summary>Settings</summary>
+        <div class="settings">
+          <div><label for="signOff">Message sign-off</label><input type="text" id="signOff"></div>
+          <div><label for="speed">Average speed (km/h)</label><input type="number" id="speed" min="10" max="60"></div>
+          <div><label for="perStop">Extra time per pickup (min)</label><input type="number" id="perStop" min="0" max="15"></div>
+          <div><label for="buffer">Safe buffer (min)</label><input type="number" id="buffer" min="0" max="30"></div>
+        </div>
+      </details>
+
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <nav class="tabs" id="tabs" hidden>
+      <button id="tabSend" class="active">Send to drivers</button>
+      <button id="tabAnalysis">Time &amp; office analysis</button>
+    </nav>
+
+    <section id="viewSend">
+      <div class="box" id="exportBox" hidden>
+        <div class="spread">
+          <div>
+            <b>Export</b>
+            <div class="muted">Save a report once you have sent everything.</div>
+          </div>
+          <div class="row">
+            <button class="primary" id="btnReport">Report (Excel)</button>
+            <button id="btnMessages">All messages (.txt)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row tools" id="tools" hidden>
+        <input type="search" id="search" placeholder="Search driver or vehicle">
+        <label class="muted"><input type="checkbox" id="unsentOnly"> Unsent only</label>
+        <button id="btnReset">Reset sent</button>
+      </div>
+
+      <div id="driverList"></div>
+    </section>
+
+    <section id="viewAnalysis" hidden></section>
+  </main>
+
+  <!-- SheetJS 0.18.5, used to read the .xls file and write the Excel report -->
+  <script src="js/xlsx.full.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/analysis.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/messages.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
