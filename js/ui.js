@@ -32,6 +32,8 @@ const UI = (() => {
     const details = [`${trip.kind} ${trip.time}`, `First pickup ${formatClock(info.firstPickup)}`];
     if (trip.km != null) details.push(`${trip.km} km`);
     details.push(`${trip.employees.length} employees`);
+    if (trip.tripId) details.push(`Trip ID ${trip.tripId}`);
+    if (trip.dropCode) details.push(`Drop ${trip.dropCode}`);
 
     const estimate = info.ok
       ? `<div>${statusTag(info)}<span class="tag">Reaches ~${formatClock(info.arrival)}</span><span class="tag">Travel ~${Math.round(info.travel)} min</span></div>`
@@ -150,9 +152,9 @@ const UI = (() => {
     });
     const officeBox = `
       <div class="box">
-        <h3>By office (employee code)</h3>
-        ${table(["Office code", "Employees", "Trips", "Avg pickup to login", "Longest"], officeRows)}
-        <p class="muted">The employee code is treated as the office.</p>
+        <h3>By drop location (office)</h3>
+        ${table(["Drop location", "Employees", "Trips", "Avg pickup to login", "Longest"], officeRows)}
+        <p class="muted">The drop location code of each employee (for example C119) is treated as the office.</p>
       </div>`;
 
     const tripRows = ranked.map(({ trip, info }) => [

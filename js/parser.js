@@ -2,10 +2,55 @@
 
 const Parser = (() => {
   const { clean, normalise, formatClock, toMinutes, toDateText, toPhone } = Utils;
-  const T = CONFIG.tripColumns;
-  const E = CONFIG.employeeColumns;
+
+  // Looks for a label row near the top ("drop location", "Trip id", ...) and moves the
+  // columns accordingly. Without a label row the positions from config.js are used.
+  function detectColumns(rows) {
+    const trip = { ...CONFIG.tripColumns };
+    const employee = { ...CONFIG.employeeColumns };
+    const found = {};
+
+    rows.slice(0, 8).forEach((row) => {
+      row.forEach((cell, col) => {
+        const text = normalise(cell);
+        if (!text || text.length > 30) return;
+        const keywords = CONFIG.labelKeywords;
+        const has = (list) => list.some((word) => text.includes(word));
+
+        if (has(keywords.tripId)) found.tripId = col;
+        else if (has(keywords.code)) found.code = col;
+        else if (has(keywords.phone)) found.phone = col;
+        else if (has(keywords.area)) found.area = col;
+      });
+    });
+
+    if (found.tripId != null) trip.tripId = found.tripId;
+    if (found.code != null) { trip.code = found.code; employee.code = found.code; }
+    if (found.phone != null) employee.phone = found.phone;
+    if (found.area != null) { employee.area = found.area; trip.phone = found.area; } // driver mobile sits in the same column as the area
+
+    return { trip, employee };
+  }
+
+  // A trip id looks like T407166. If its column is empty we look through the whole row.
+  function findTripId(row, columns) {
+    const direct = clean(row[columns.tripId]);
+    if (direct) return direct;
+    const cell = row.find((value) => /^[A-Za-z]{1,3}\d{5,}$/.test(clean(value)));
+    return cell ? clean(cell) : "";
+  }
+
+  // Distance in km: the configured column, otherwise the first small number to the right of the phone column.
+  function findKm(row, columns) {
+    if (typeof row[columns.km] === "number") return row[columns.km];
+    for (let i = columns.phone + 1; i < row.length; i++) {
+      if (typeof row[i] === "number" && row[i] > 0 && row[i] < 1000) return row[i];
+    }
+    return null;
+  }
 
   function parseTrips(rows) {
+    const { trip: T, employee: E } = detectColumns(rows);
     const trips = [];
     let current = null;
 
@@ -25,8 +70,9 @@ const Parser = (() => {
           vehicle: clean(row[T.vehicle]),
           driver: clean(row[T.driver]),
           sheetPhone: toPhone(row[T.phone]),
-          km: typeof row[T.km] === "number" ? row[T.km] : null,
-          tripId: clean(row[T.tripId]),
+          dropCode: clean(row[T.code]),
+          km: findKm(row, T),
+          tripId: findTripId(row, T),
           employees: []
         };
         trips.push(current);

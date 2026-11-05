@@ -9,11 +9,13 @@ const Messages = (() => {
       `Driver: ${trip.driver}`
     ];
     if (trip.tripId) lines.push(`Trip ID: ${trip.tripId}`);
+    if (CONFIG.message.showTripDrop && trip.dropCode) lines.push(`Drop Location: ${trip.dropCode}`);
     lines.push("", `*Pickup List (${trip.employees.length})*`);
 
     trip.employees.forEach((emp) => {
       lines.push("", `${emp.no}. *${emp.name}*${emp.gender ? ` (${emp.gender})` : ""}`);
       lines.push(`   Pickup: ${emp.pickup}${emp.area ? " | " + emp.area : ""}`);
+      if (CONFIG.message.showEmployeeDrop && emp.code) lines.push(`   Drop: ${emp.code}`);
       if (emp.phone) lines.push(`   Ph: ${emp.phone}`);
       if (emp.address) lines.push(`   Address: ${emp.address}`);
     });
