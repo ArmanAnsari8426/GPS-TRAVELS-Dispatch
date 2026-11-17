@@ -1,12 +1,18 @@
 // Entry point: holds the state, reads the files and wires up the events.
 
+const prefs = Store.loadPrefs();
+
 const state = {
   trips: [],
   contacts: {},
   sent: {},
   tab: "send",
-  settings: { ...CONFIG.defaults }
+  settings: { ...CONFIG.defaults },
+  autoSender: prefs.autoSender,
+  queueMode: prefs.queueMode
 };
+
+const savePrefs = () => Store.savePrefs({ autoSender: state.autoSender, queueMode: state.queueMode });
 
 const $ = (id) => document.getElementById(id);
 
@@ -73,6 +79,31 @@ function markSent(indexes) {
   setTimeout(refresh, 400); // let the WhatsApp tab open first
 }
 
+// The auto sender writes a report; trips it sent are marked as sent here.
+function importReport(file) {
+  if (!state.trips.length) { alert("Load the trip sheet first, then import the report."); return; }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const report = JSON.parse(event.target.result);
+      const known = new Set(state.trips.map((trip, i) => Store.keyOf(trip, i)));
+      let marked = 0;
+
+      (report.results || []).filter((r) => r.status === "sent").forEach((r) => {
+        r.keys.filter((key) => known.has(key)).forEach((key) => { state.sent[key] = true; marked++; });
+      });
+
+      Store.save(state.sent);
+      refresh();
+      alert(`${marked} trips marked as sent.`);
+    } catch (err) {
+      alert(`Could not read the report: ${err.message}`);
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ----- Events ----- */
 
 $("tabSend").addEventListener("click", () => { state.tab = "send"; refresh(); });
@@ -80,6 +111,28 @@ $("tabAnalysis").addEventListener("click", () => { state.tab = "analysis"; refre
 
 $("btnReport").addEventListener("click", () => Exports.downloadReport(state));
 $("btnMessages").addEventListener("click", () => Exports.downloadMessages(state));
+$("btnAuto").addEventListener("click", () => {
+  if (!state.autoSender) {
+    const message = "The auto sender sends messages through WhatsApp Web by itself. "
+      + "This is not an official WhatsApp feature and can get a number restricted.\n\n"
+      + "Start with small batches and use it for drivers who already know your number.\n\nTurn it on?";
+    if (!confirm(message)) return;
+  }
+  state.autoSender = !state.autoSender;
+  savePrefs();
+  refresh();
+});
+$("queueMode").addEventListener("change", (event) => {
+  state.queueMode = event.target.value;
+  savePrefs();
+});
+$("btnQueue").addEventListener("click", () => Exports.downloadQueue(state));
+$("btnImport").addEventListener("click", () => $("fileReport").click());
+$("fileReport").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (file) importReport(file);
+});
 $("btnReset").addEventListener("click", () => {
   state.sent = {};
   Store.save(state.sent);

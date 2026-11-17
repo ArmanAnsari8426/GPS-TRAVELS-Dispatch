@@ -20,5 +20,25 @@ const Store = (() => {
     }
   }
 
-  return { keyOf, load, save };
+  // Auto sender switch and queue mode.
+  const PREFS_KEY = `${CONFIG.storageKey}-prefs`;
+
+  function loadPrefs() {
+    const defaults = { autoSender: CONFIG.autoSender.enabledByDefault, queueMode: CONFIG.autoSender.queueMode };
+    try {
+      return { ...defaults, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") };
+    } catch (err) {
+      return defaults;
+    }
+  }
+
+  function savePrefs(prefs) {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch (err) {
+      // ignore, see save()
+    }
+  }
+
+  return { keyOf, load, save, loadPrefs, savePrefs };
 })();

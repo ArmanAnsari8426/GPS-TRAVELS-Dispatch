@@ -25,6 +25,12 @@ const CONFIG = {
     area: ["loctaion", "location"]
   },
 
+  // Auto sender (see auto-sender/README.md). It stays off until someone turns it on in the page.
+  autoSender: {
+    enabledByDefault: false,
+    queueMode: "separate"   // "separate": one message per trip, "together": one message per driver
+  },
+
   // What goes into the WhatsApp message besides the basics.
   message: {
     showTripDrop: true,      // "Drop Location: C10" under the trip details

@@ -4,8 +4,9 @@ const Exports = (() => {
   const { formatClock } = Utils;
 
   function saveFile(name, data) {
+    const isJson = name.endsWith(".json");
     const blob = typeof data === "string"
-      ? new Blob(["\ufeff" + data], { type: "text/plain;charset=utf-8" })
+      ? new Blob([isJson ? data : "\ufeff" + data], { type: isJson ? "application/json" : "text/plain;charset=utf-8" })
       : new Blob([data], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -66,5 +67,54 @@ const Exports = (() => {
     saveFile(`Messages_${reportDate(state)}.txt`, text);
   }
 
-  return { downloadReport, downloadMessages };
+  // Messages that are still unsent, for the auto sender (auto-sender/auto_sender.py).
+  // "separate": one message per trip. "together": one message per driver with all trips.
+  function buildQueue(state) {
+    const { trips, contacts, sent, settings, queueMode } = state;
+    const messages = [];
+    const skipped = [];
+
+    const addMessage = (group, indexes) => {
+      const first = trips[indexes[0]];
+      messages.push({
+        id: `${first.date}|${group.phone}|${indexes.map((i) => trips[i].tripId || i).join(",")}`,
+        driver: first.driver,
+        phone: `91${group.phone}`,
+        vehicles: Utils.unique(indexes.map((i) => trips[i].vehicle)),
+        tripIds: indexes.map((i) => trips[i].tripId),
+        keys: indexes.map((i) => Store.keyOf(trips[i], i)),
+        text: Messages.build(trips, indexes, settings.signOff)
+      });
+    };
+
+    Analysis.groupByDriver(trips, contacts).forEach((group) => {
+      const pending = group.indexes.filter((i) => !sent[Store.keyOf(trips[i], i)]);
+      if (!pending.length) return;
+
+      if (group.phone.length !== 10) {
+        skipped.push({ driver: trips[pending[0]].driver, reason: "No phone number" });
+        return;
+      }
+
+      if (queueMode === "together") addMessage(group, pending);
+      else pending.forEach((i) => addMessage(group, [i]));
+    });
+
+    return { created: new Date().toISOString(), date: reportDate(state), mode: queueMode, count: messages.length, messages, skipped };
+  }
+
+  function downloadQueue(state) {
+    if (!state.autoSender) {
+      alert("Turn the auto sender on first.");
+      return;
+    }
+    const queue = buildQueue(state);
+    if (!queue.count) {
+      alert("Nothing to send: every driver is either sent already or has no phone number.");
+      return;
+    }
+    saveFile(`dispatch_queue_${reportDate(state)}.json`, JSON.stringify(queue, null, 2));
+  }
+
+  return { downloadReport, downloadMessages, downloadQueue };
 })();

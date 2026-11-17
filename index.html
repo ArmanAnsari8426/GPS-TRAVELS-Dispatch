@@ -61,6 +61,29 @@
             <button id="btnMessages">All messages (.txt)</button>
           </div>
         </div>
+        <div class="auto-row">
+          <div class="spread">
+            <div>
+              <b>Auto sender</b>
+              <div class="muted" id="autoHint"></div>
+            </div>
+            <button id="btnAuto" class="switch" aria-pressed="false">Auto sender: OFF</button>
+          </div>
+          <div id="autoPanel" hidden>
+            <div class="row auto-mode">
+              <label class="muted" for="queueMode">Drivers with more than one trip:</label>
+              <select id="queueMode">
+                <option value="separate">One message per trip</option>
+                <option value="together">All trips in one message</option>
+              </select>
+            </div>
+            <div class="row">
+              <button id="btnQueue">Export queue (.json)</button>
+              <button id="btnImport">Import send report</button>
+              <input type="file" id="fileReport" accept=".json" hidden>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="row tools" id="tools" hidden>

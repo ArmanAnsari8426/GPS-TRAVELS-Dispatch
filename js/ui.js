@@ -77,7 +77,7 @@ const UI = (() => {
 
     const sendAll = group.indexes.length > 1
       ? `<div class="spread trip-all">
-           <span class="muted">All trips in one message</span>
+           <span class="muted">Or send all trips in a single message</span>
            <a class="btn wa${hasPhone ? "" : " disabled"}" target="_blank" rel="noopener"
               data-send="${group.indexes.join(",")}"
               href="${Messages.whatsappUrl(Messages.build(trips, group.indexes, settings.signOff), group.phone)}">
@@ -186,10 +186,23 @@ const UI = (() => {
     ]);
   }
 
+  function renderAutoSender(state) {
+    const on = state.autoSender;
+    $("btnAuto").textContent = `Auto sender: ${on ? "ON" : "OFF"}`;
+    $("btnAuto").classList.toggle("on", on);
+    $("btnAuto").setAttribute("aria-pressed", String(on));
+    $("autoPanel").hidden = !on;
+    $("queueMode").value = state.queueMode;
+    $("autoHint").textContent = on
+      ? "On. Export the unsent messages, run the auto sender on your computer, then import its report."
+      : "Off. Turn it on to export a queue for the auto sender.";
+  }
+
   function render(state) {
     const hasTrips = state.trips.length > 0;
 
     renderStats(state);
+    renderAutoSender(state);
     $("tabs").hidden = !hasTrips;
     $("tools").hidden = !hasTrips;
     $("exportBox").hidden = !hasTrips;
