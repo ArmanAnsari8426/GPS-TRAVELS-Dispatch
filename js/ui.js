@@ -33,7 +33,6 @@ const UI = (() => {
     if (trip.km != null) details.push(`${trip.km} km`);
     details.push(`${trip.employees.length} employees`);
     if (trip.tripId) details.push(`Trip ID ${trip.tripId}`);
-    if (trip.dropCode) details.push(`Drop ${trip.dropCode}`);
 
     const estimate = info.ok
       ? `<div>${statusTag(info)}<span class="tag">Reaches ~${formatClock(info.arrival)}</span><span class="tag">Travel ~${Math.round(info.travel)} min</span></div>`

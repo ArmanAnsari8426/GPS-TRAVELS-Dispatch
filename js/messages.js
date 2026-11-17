@@ -9,7 +9,6 @@ const Messages = (() => {
       `Driver: ${trip.driver}`
     ];
     if (trip.tripId) lines.push(`Trip ID: ${trip.tripId}`);
-    if (CONFIG.message.showTripDrop && trip.dropCode) lines.push(`Drop Location: ${trip.dropCode}`);
     lines.push("", `*Pickup List (${trip.employees.length})*`);
 
     trip.employees.forEach((emp) => {

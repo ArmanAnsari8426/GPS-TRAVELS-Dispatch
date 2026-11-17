@@ -23,12 +23,12 @@ const Exports = (() => {
   function downloadReport(state) {
     const { trips, contacts, sent, settings } = state;
 
-    const driverRows = [["Driver", "Mobile", "Vehicle", "Trip ID", "Trip", "Login", "Drop location", "Employees", "Status"]];
+    const driverRows = [["Driver", "Mobile", "Vehicle", "Trip ID", "Trip", "Login", "Employees", "Status"]];
     const employeeRows = [["Trip ID", "Driver", "Vehicle", "Login", "Employee", "Gender", "Pickup", "Drop location", "Area", "Phone", "Address"]];
 
     trips.forEach((trip, index) => {
       const status = sent[Store.keyOf(trip, index)] ? "Sent" : "Not sent";
-      driverRows.push([trip.driver, Analysis.phoneFor(trip, contacts), trip.vehicle, trip.tripId, trip.label, `${trip.kind} ${trip.time}`, trip.dropCode, trip.employees.length, status]);
+      driverRows.push([trip.driver, Analysis.phoneFor(trip, contacts), trip.vehicle, trip.tripId, trip.label, `${trip.kind} ${trip.time}`, trip.employees.length, status]);
       trip.employees.forEach((e) => {
         employeeRows.push([trip.tripId, trip.driver, trip.vehicle, trip.time, e.name, e.gender, e.pickup, e.code, e.area, e.phone, e.address]);
       });

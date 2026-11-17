@@ -25,7 +25,7 @@ const Parser = (() => {
     });
 
     if (found.tripId != null) trip.tripId = found.tripId;
-    if (found.code != null) { trip.code = found.code; employee.code = found.code; }
+    if (found.code != null) employee.code = found.code;
     if (found.phone != null) employee.phone = found.phone;
     if (found.area != null) { employee.area = found.area; trip.phone = found.area; } // driver mobile sits in the same column as the area
 
@@ -70,7 +70,6 @@ const Parser = (() => {
           vehicle: clean(row[T.vehicle]),
           driver: clean(row[T.driver]),
           sheetPhone: toPhone(row[T.phone]),
-          dropCode: clean(row[T.code]),
           km: findKm(row, T),
           tripId: findTripId(row, T),
           employees: []
